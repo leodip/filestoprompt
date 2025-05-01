@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Files to Prompt</title>
+    <style>
+        /* CSS Variables for theme customization */
+        :root {
+            /* Light Theme (default) */
+            --background-color: #fff;
+            --text-color: #333;
+            --sidebar-bg: #f5f5f5;
+            --item-bg: #fff;
+            --border-color: #ddd;
+            --button-bg: #007bff;
+            --button-hover: #0056b3;
+            --danger-button: #dc3545;
+            --danger-button-hover: #c82333;
+            --success-button: #28a745;
+            --success-button-hover: #218838;
+            --modal-bg: #fefefe;
+            --modal-overlay: rgba(0, 0, 0, 0.4);
+            --scrollbar-track: #f1f1f1;
+            --scrollbar-thumb: #c1c1c1;
+            --scrollbar-thumb-hover: #a8a8a8;
+            --info-bg: #f8f9fa;
+            --info-border: #17a2b8;
+            --error-color: #dc3545;
+            --error-bg: #f8d7da;
+            --token-count-bg: #e9ecef;
+            --token-count-color: #495057;
+            --modal-close: #aaa;
+            --modal-close-hover: #000;
+            --preview-bg: #f9f9f9;
+            --version-color: #777;
+            --loading-spinner-bg: rgba(0, 123, 255, 0.3);
+            --loading-spinner-border: #007bff;
+        }
+
+        /* Dark Theme */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1e1e1e;
+                --text-color: #e0e0e0;
+                --sidebar-bg: #2d2d2d;
+                --item-bg: #3a3a3a;
+                --border-color: #555;
+                --button-bg: #0366d6;
+                --button-hover: #0275d8;
+                --danger-button: #cb2431;
+                --danger-button-hover: #b5202c;
+                --success-button: #22863a;
+                --success-button-hover: #1b7430;
+                --modal-bg: #2d2d2d;
+                --modal-overlay: rgba(0, 0, 0, 0.7);
+                --scrollbar-track: #2d2d2d;
+                --scrollbar-thumb: #555;
+                --scrollbar-thumb-hover: #777;
+                --info-bg: #2d3748;
+                --info-border: #4299e1;
+                --error-color: #f56565;
+                --error-bg: #742a2a;
+                --token-count-bg: #2d3748;
+                --token-count-color: #cbd5e0;
+                --modal-close: #888;
+                --modal-close-hover: #ccc;
+                --preview-bg: #2d3748;
+                --version-color: #a0aec0;
+                --loading-spinner-bg: rgba(66, 153, 225, 0.2);
+                --loading-spinner-border: #4299e1;
+            }
+        }
+
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover);
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar-bg);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 100%;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 100%;
+            overflow: hidden;
+            padding-right: 2px; /* Add small padding to ensure right border is visible */
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background: var(--button-bg);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: var(--button-hover);
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-right: -5px; /* Hide the scrollbar by shifting it right */
+            padding-right: 5px; /* Add padding to compensate for the shift */
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: var(--item-bg);
+            margin-bottom: 4px;
+            border-radius: 4px;
+        }
+
+        .file-item button {
+            background: var(--danger-button);
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .file-item button:hover {
+            background: var(--danger-button-hover);
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: none;
+            font-family: monospace;
+            box-sizing: border-box; /* This ensures padding doesn't add to width */
+            background-color: var(--item-bg);
+            color: var(--text-color);
+        }
+
+        .error {
+            color: var(--error-color);
+            padding: 10px;
+            background: var(--error-bg);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: var(--modal-overlay);
+        }
+
+        .modal-content {
+            background-color: var(--modal-bg);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            width: 50%;
+            border-radius: 8px;
+            max-width: 600px;
+            color: var(--text-color);
+        }
+
+        .close {
+            color: var(--modal-close);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--modal-close-hover);
+            text-decoration: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: var(--item-bg);
+            color: var(--text-color);
+        }
+
+        .loading-indicator {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: var(--info-bg);
+            border-radius: 4px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--loading-spinner-bg);
+            border-radius: 50%;
+            border-top-color: var(--loading-spinner-border);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .search-results {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .file-preview {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            background-color: var(--preview-bg);
+        }
+
+        .preview-item {
+            font-family: monospace;
+            font-size: 13px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .modal-info {
+            background-color: var(--info-bg);
+            border-left: 4px solid var(--info-border);
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .modal-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .primary-button {
+            background-color: var(--success-button);
+        }
+
+        .primary-button:hover {
+            background-color: var(--success-button-hover);
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Token count style */
+        .token-count {
+            padding: 8px 12px;
+            background-color: var(--token-count-bg);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            text-align: right;
+            color: var(--token-count-color);
+            font-size: 14px;
+        }
+
+        /* Version info style */
+        .version-info {
+            margin-top: auto;
+            font-size: 12px;
+            color: var(--version-color);
+            text-align: center;
+            padding: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="buttons">
+                <button id="addFile">Add File</button>
+                <button id="searchFilesBtn">Search Files</button>
+                <button id="reloadFiles">Reload</button>
+                <button id="clearAll">Clear All</button>
+            </div>
+            <div class="file-list" id="fileList"></div>
+            <div class="version-info">
+                <span id="version">v0.0.0</span>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="error" id="error"></div>
+            <textarea id="content" readonly></textarea>
+            <div id="tokenCount" class="token-count">Approx. tokens: 0</div>
+            <button id="copy">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Search Files</h2>
+            <div class="form-group">
+                <label for="baseFolder">Base Folder:</label>
+                <input type="text" id="baseFolder" placeholder="/home/user/project/">
+            </div>
+            <div class="form-group">
+                <label for="extensions">Extensions (comma separated):</label>
+                <input type="text" id="extensions" placeholder="js,jsx,ts,tsx,py,html,css">
+            </div>
+            <div class="form-group">
+                <label for="excludeFolders">Exclude Folders (comma separated):</label>
+                <input type="text" id="excludeFolders" value="node_modules,dist,build,.git,coverage,.venv,__pycache__">
+            </div>
+            <div class="modal-info">
+                <p>Searches recursively through the base folder for files with matching extensions.</p>
+                <p>Maximum 200 files can be loaded at once.</p>
+            </div>
+            <div id="loading" class="loading-indicator">
+                <div class="spinner"></div>
+                <span>Searching files...</span>
+            </div>
+            <div id="search-results" class="search-results">
+                <h3>Found <span id="file-count">0</span> files</h3>
+                <div id="file-preview" class="file-preview"></div>
+                <div class="confirmation-buttons">
+                    <button id="addAllFiles" class="primary-button">Add All Files</button>
+                    <button id="cancelAddFiles">Cancel</button>
+                </div>
+            </div>
+            <div id="search-buttons" class="buttons">
+                <button id="searchFiles" class="primary-button">Search Files</button>
+                <button id="cancelSearch">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

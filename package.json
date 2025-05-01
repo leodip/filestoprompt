@@ -1,0 +1,32 @@
+{
+  "name": "filestoprompt",
+  "version": "1.0.0-6",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "prebuild": "node increment-build.js",
+    "build": "electron-builder"
+  },
+  "keywords": [],
+  "author": "Leonardo D'Ippolito",
+  "license": "ISC",
+  "description": "Application to combine text files into a prompt",
+  "build": {
+    "appId": "leodip.filestoprompt",
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.2.0",
+    "electron-builder": "^26.0.12",
+    "version-incrementer": "^0.1.1"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.2",
+    "glob": "^11.0.1"
+  }
+}
