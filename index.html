@@ -357,6 +357,28 @@
             text-align: center;
             padding: 8px 0;
         }
+        
+        /* Form row with search button aligned */
+        .form-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        /* Modal footer for canceling only */
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -386,36 +408,49 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Search Files</h2>
+            
             <div class="form-group">
                 <label for="baseFolder">Base Folder:</label>
-                <input type="text" id="baseFolder" placeholder="/home/user/project/">
+                <div id="baseFolder-container" style="display: flex; gap: 8px;">
+                    <input type="text" id="baseFolder" placeholder="/home/user/project/" style="flex: 1;">
+                    <button id="browseFolder">Browse...</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="extensions">Extensions (comma separated):</label>
-                <input type="text" id="extensions" placeholder="js,jsx,ts,tsx,py,html,css">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="extensions">Extensions (comma separated):</label>
+                    <input type="text" id="extensions" placeholder="js,jsx,ts,tsx,py,html,css">
+                </div>
+                <button id="searchFiles" class="primary-button">Search Files</button>
             </div>
+            
             <div class="form-group">
                 <label for="excludeFolders">Exclude Folders (comma separated):</label>
                 <input type="text" id="excludeFolders" value="node_modules,dist,build,.git,coverage,.venv,__pycache__">
             </div>
+            
             <div class="modal-info">
                 <p>Searches recursively through the base folder for files with matching extensions.</p>
                 <p>Maximum 200 files can be loaded at once.</p>
             </div>
+            
             <div id="loading" class="loading-indicator">
                 <div class="spinner"></div>
                 <span>Searching files...</span>
             </div>
+            
+            <!-- Search results section -->
             <div id="search-results" class="search-results">
                 <h3>Found <span id="file-count">0</span> files</h3>
                 <div id="file-preview" class="file-preview"></div>
                 <div class="confirmation-buttons">
                     <button id="addAllFiles" class="primary-button">Add All Files</button>
-                    <button id="cancelAddFiles">Cancel</button>
                 </div>
             </div>
-            <div id="search-buttons" class="buttons">
-                <button id="searchFiles" class="primary-button">Search Files</button>
+            
+            <!-- Modal footer with just cancel button -->
+            <div class="modal-footer">
                 <button id="cancelSearch">Cancel</button>
             </div>
         </div>

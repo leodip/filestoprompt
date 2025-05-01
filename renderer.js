@@ -130,8 +130,9 @@ function showSearchResults(files) {
     
     // Show search results section
     document.getElementById('search-results').style.display = 'flex';
-    // Hide search buttons
-    document.getElementById('search-buttons').style.display = 'none';
+    
+    // Re-enable the search button
+    document.getElementById('searchFiles').disabled = false;
 }
 
 // Function to add all files from search results
@@ -156,9 +157,6 @@ function resetModal() {
     // Hide loading and results sections
     document.getElementById('loading').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
-    
-    // Show search buttons
-    document.getElementById('search-buttons').style.display = 'flex';
     
     // Enable buttons
     document.getElementById('searchFiles').disabled = false;
@@ -211,6 +209,9 @@ async function searchFiles() {
             } else {
                 // Show the search results
                 showSearchResults(result.files);
+                
+                // Re-enable the cancel button
+                cancelButton.disabled = false;
                 
                 // If there are errors, show them
                 if (result.errors && result.errors.length > 0) {
@@ -317,36 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Add event listeners for confirmation buttons
     document.getElementById('addAllFiles').addEventListener('click', addAllFilesFromSearch);
-    document.getElementById('cancelAddFiles').addEventListener('click', closeModalWithReset);
     
-    // Add browse button next to base folder input
-    const baseFolderInput = document.getElementById('baseFolder');
-    const baseFolderParent = baseFolderInput.parentElement;
-    
-    // Create a container for the input and button
-    const inputContainer = document.createElement('div');
-    inputContainer.style.display = 'flex';
-    inputContainer.style.gap = '8px';
-    
-    // Move input into container
-    baseFolderInput.parentNode.removeChild(baseFolderInput);
-    inputContainer.appendChild(baseFolderInput);
-    
-    // Add browse button
-    browseBtn.style.flexShrink = '0';
-    inputContainer.appendChild(browseBtn);
-    
-    // Add container to form group
-    baseFolderParent.appendChild(inputContainer);
-    
-    // Add event listener for browse button
-    browseBtn.addEventListener('click', selectDirectory);
-    
-    // We're removing the event listener that closes the modal when clicking outside
-    // This was previously here:
-    // window.addEventListener('click', (event) => {
-    //     if (event.target === modal) {
-    //         closeModalWithReset();
-    //     }
-    // });
+    // The Browse button is now already in the HTML, we just need to add the event listener
+    document.getElementById('browseFolder').addEventListener('click', selectDirectory);
 });
