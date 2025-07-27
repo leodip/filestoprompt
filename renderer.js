@@ -3,6 +3,28 @@ let files = [];
 let searchResultFiles = [];
 let isResizing = false;
 
+// Variable to store last visited folder in renderer process
+let lastVisitedFolder = null;
+
+// Initialize last visited folder from main process
+async function initializeLastFolder() {
+    try {
+        lastVisitedFolder = await window.electronAPI.getLastFolder();
+    } catch (error) {
+        console.error('Failed to get last folder:', error);
+    }
+}
+
+// Update last visited folder
+async function updateLastFolder(folderPath) {
+    lastVisitedFolder = folderPath;
+    try {
+        await window.electronAPI.setLastFolder(folderPath);
+    } catch (error) {
+        console.error('Failed to save last folder:', error);
+    }
+}
+
 // Resizable panel functionality
 function initResizablePanel() {
     const sidebar = document.getElementById('sidebar');
@@ -132,16 +154,20 @@ function clearAll() {
 
 // Modal functionality
 const modal = document.getElementById('searchModal');
-const browseBtn = document.createElement('button');
-browseBtn.textContent = 'Browse...';
-browseBtn.id = 'browseFolder';
 
 function openModal() {
     // Reset the modal state
     resetModal();
     
-    // Clear input fields (except excludeFolders which has default value)
-    document.getElementById('baseFolder').value = '';
+    // Set the base folder to last visited folder if available
+    const baseFolderInput = document.getElementById('baseFolder');
+    if (lastVisitedFolder) {
+        baseFolderInput.value = lastVisitedFolder;
+    } else {
+        baseFolderInput.value = '';
+    }
+    
+    // Clear other input fields (except excludeFolders which has default value)
     document.getElementById('extensions').value = '';
     
     // Show the modal
@@ -225,6 +251,9 @@ async function searchFiles() {
         return;
     }
 
+    // Update last visited folder
+    await updateLastFolder(baseFolder);
+
     const extensionsInput = document.getElementById('extensions').value.trim();
     const excludeFoldersInput = document.getElementById('excludeFolders').value.trim();
     
@@ -283,6 +312,8 @@ async function selectDirectory() {
         const result = await window.electronAPI.selectDirectory();
         if (result.success) {
             document.getElementById('baseFolder').value = result.path;
+            // Update last visited folder
+            await updateLastFolder(result.path);
         }
     } catch (error) {
         showError('Failed to select directory');
@@ -300,6 +331,10 @@ document.getElementById('addFile').addEventListener('click', async () => {
             });
             updateFileList();
             updateTextArea();
+            
+            // Extract and update last visited folder from file path
+            const folderPath = result.path.substring(0, result.path.lastIndexOf('/'));
+            await updateLastFolder(folderPath);
         } else {
             showError(result.error);
         }
@@ -323,7 +358,6 @@ document.getElementById('clearAll').addEventListener('click', clearAll);
 
 // Add new button to sidebar for opening modal
 function createSearchFilesButton() {
-    const buttonsDiv = document.querySelector('.buttons');
     const searchFilesBtn = document.getElementById('searchFilesBtn');
     
     // Add event listener
@@ -344,6 +378,9 @@ function createTokenCounter() {
 
 // Set up modal event listeners
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize last visited folder
+    await initializeLastFolder();
+    
     createSearchFilesButton();
     
     // Initialize resizable panel

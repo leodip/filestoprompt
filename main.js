@@ -3,6 +3,9 @@ const path = require('path');
 const fs = require('fs/promises');
 const { glob } = require('glob');
 
+// Store for remembering last visited folder
+let lastVisitedFolder = null;
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -16,6 +19,8 @@ function createWindow() {
 
   win.loadFile('index.html');
 }
+
+app.disableHardwareAcceleration(); 
 
 app.whenReady().then(() => {
   createWindow();
@@ -90,12 +95,22 @@ ipcMain.handle('reloadFile', async (_, filePath) => {
 });
 
 ipcMain.handle('select-file', async () => {
-  const result = await dialog.showOpenDialog({
+  const dialogOptions = {
     properties: ['openFile']
-  });
+  };
+  
+  // Only set defaultPath if we have a valid folder
+  if (lastVisitedFolder) {
+    dialogOptions.defaultPath = lastVisitedFolder;
+  }
+  
+  const result = await dialog.showOpenDialog(dialogOptions);
   
   if (!result.canceled && result.filePaths.length > 0) {
     const filePath = result.filePaths[0];
+    
+    // Remember the folder for next time
+    lastVisitedFolder = path.dirname(filePath);
     
     if (await isTextFile(filePath)) {
       const fileContent = await readTextFile(filePath);
@@ -115,16 +130,27 @@ ipcMain.handle('select-file', async () => {
   return { success: false, error: 'No file selected' };
 });
 
-// Add this IPC handler for directory selection
+// Updated directory selection handler
 ipcMain.handle('select-directory', async () => {
-  const result = await dialog.showOpenDialog({
+  const dialogOptions = {
     properties: ['openDirectory']
-  });
+  };
+  
+  // Only set defaultPath if we have a valid folder
+  if (lastVisitedFolder) {
+    dialogOptions.defaultPath = lastVisitedFolder;
+  }
+  
+  const result = await dialog.showOpenDialog(dialogOptions);
   
   if (!result.canceled && result.filePaths.length > 0) {
+    const selectedPath = result.filePaths[0];
+    // Remember this folder for next time
+    lastVisitedFolder = selectedPath;
+    
     return {
       success: true,
-      path: result.filePaths[0]
+      path: selectedPath
     };
   }
   return { success: false, error: 'No directory selected' };
@@ -138,6 +164,9 @@ function estimateTokenCount(text) {
 
 // Add recursive file search functionality
 ipcMain.handle('search-files', async (_, baseFolder, extensionsString, excludeFoldersString) => {
+  // Remember this folder for next time
+  lastVisitedFolder = baseFolder;
+  
   // Parse the comma-separated strings into arrays
   const extensions = extensionsString.split(',').map(ext => ext.trim()).filter(ext => ext);
   const excludeFolders = excludeFoldersString.split(',').map(folder => folder.trim()).filter(folder => folder);
@@ -249,4 +278,13 @@ ipcMain.handle('calculate-tokens', async (_, text) => {
 // Add handler to get app version
 ipcMain.handle('get-app-version', () => {
   return app.getVersion();
+});
+
+// Add handlers for persistent storage
+ipcMain.handle('get-last-folder', () => {
+  return lastVisitedFolder;
+});
+
+ipcMain.handle('set-last-folder', (_, folderPath) => {
+  lastVisitedFolder = folderPath;
 });
