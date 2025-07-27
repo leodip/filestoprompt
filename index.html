@@ -34,6 +34,8 @@
             --version-color: #777;
             --loading-spinner-bg: rgba(0, 123, 255, 0.3);
             --loading-spinner-border: #007bff;
+            --resize-handle-color: #ccc;
+            --resize-handle-hover: #007bff;
         }
 
         /* Dark Theme */
@@ -67,6 +69,8 @@
                 --version-color: #a0aec0;
                 --loading-spinner-bg: rgba(66, 153, 225, 0.2);
                 --loading-spinner-border: #4299e1;
+                --resize-handle-color: #555;
+                --resize-handle-hover: #4299e1;
             }
         }
 
@@ -104,7 +108,7 @@
 
         .container {
             display: flex;
-            gap: 20px;
+            gap: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -112,6 +116,8 @@
 
         .sidebar {
             width: 300px;
+            min-width: 200px;
+            max-width: 60%;
             background: var(--sidebar-bg);
             padding: 20px;
             border-radius: 8px;
@@ -120,6 +126,41 @@
             gap: 10px;
             max-height: 100%;
             overflow: hidden;
+            position: relative;
+        }
+
+        .resize-handle {
+            position: absolute;
+            top: 0;
+            right: -5px;
+            width: 10px;
+            height: 100%;
+            cursor: col-resize;
+            background: transparent;
+            z-index: 10;
+            transition: background-color 0.2s ease;
+        }
+
+        .resize-handle:hover {
+            background: linear-gradient(to right, transparent 2px, var(--resize-handle-hover) 4px, var(--resize-handle-hover) 6px, transparent 8px);
+        }
+
+        .resize-handle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3px;
+            height: 30px;
+            background: var(--resize-handle-color);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .resize-handle:hover::before {
+            opacity: 1;
         }
 
         .main-content {
@@ -129,7 +170,7 @@
             gap: 10px;
             max-height: 100%;
             overflow: hidden;
-            padding-right: 2px; /* Add small padding to ensure right border is visible */
+            padding-left: 20px;
         }
 
         .buttons {
@@ -169,10 +210,17 @@
             border-radius: 4px;
         }
 
+        .file-item span {
+            flex: 1;
+            word-break: break-all;
+            margin-right: 8px;
+        }
+
         .file-item button {
             background: var(--danger-button);
             padding: 4px 8px;
             font-size: 12px;
+            flex-shrink: 0;
         }
 
         .file-item button:hover {
@@ -379,11 +427,17 @@
             padding-top: 15px;
             border-top: 1px solid var(--border-color);
         }
+
+        /* Prevent text selection while resizing */
+        .resizing {
+            user-select: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
+            <div class="resize-handle" id="resizeHandle"></div>
             <div class="buttons">
                 <button id="addFile">Add File</button>
                 <button id="searchFilesBtn">Search Files</button>

@@ -1,6 +1,48 @@
 let files = [];
 // Variables to store search results
 let searchResultFiles = [];
+let isResizing = false;
+
+// Resizable panel functionality
+function initResizablePanel() {
+    const sidebar = document.getElementById('sidebar');
+    const resizeHandle = document.getElementById('resizeHandle');
+
+    if (!sidebar || !resizeHandle) {
+        console.error('Sidebar or resize handle not found');
+        return;
+    }
+
+    resizeHandle.addEventListener('mousedown', initResize);
+
+    function initResize(e) {
+        isResizing = true;
+        document.body.classList.add('resizing');
+        document.addEventListener('mousemove', doResize);
+        document.addEventListener('mouseup', stopResize);
+        e.preventDefault();
+    }
+
+    function doResize(e) {
+        if (!isResizing) return;
+        
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
+        const newWidth = e.clientX - containerRect.left;
+        const minWidth = 200;
+        const maxWidth = containerRect.width * 0.6; // 60% of container width
+        
+        if (newWidth >= minWidth && newWidth <= maxWidth) {
+            sidebar.style.width = newWidth + 'px';
+        }
+    }
+
+    function stopResize() {
+        isResizing = false;
+        document.body.classList.remove('resizing');
+        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mouseup', stopResize);
+    }
+}
 
 function showError(message) {
     const errorElement = document.getElementById('error');
@@ -42,6 +84,7 @@ function updateFileList() {
         
         const fileName = document.createElement('span');
         fileName.textContent = file.path.split('/').pop();
+        fileName.title = file.path; // Add tooltip with full path
         
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
@@ -301,7 +344,10 @@ function createTokenCounter() {
 
 // Set up modal event listeners
 document.addEventListener('DOMContentLoaded', async () => {
-    createSearchFilesButton();    
+    createSearchFilesButton();
+    
+    // Initialize resizable panel
+    initResizablePanel();
     
     // Display app version
     try {
